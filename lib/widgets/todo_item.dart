@@ -33,11 +33,11 @@ class ToDoItem extends StatelessWidget {
             color: tdRed,
             borderRadius: BorderRadius.circular(5),
           ),
-          child: const Align(
+          child: Align(
             alignment: Alignment.center,
             child: Text(
-              '99.99',
-              style: TextStyle(
+              '${todo.price}',
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.white,
               ),

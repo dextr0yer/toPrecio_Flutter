@@ -105,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
           color: tdBlack,
           size: 30,
         ),
-        const Text('Sara Lopez',
+        const Text('Nelly Martinez',
             style: TextStyle(fontSize: 20, color: Colors.black)),
         SizedBox(
           height: 40,

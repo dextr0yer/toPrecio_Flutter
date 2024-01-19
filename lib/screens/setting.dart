@@ -15,10 +15,10 @@ class SettingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                Icons.home_outlined,
+                Icons.settings_outlined,
                 size: 100,
               ),
-              Text('Home Screen'),
+              Text('Settings Screen'),
             ],
           ),
         ),

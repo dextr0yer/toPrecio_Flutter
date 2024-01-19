@@ -28,7 +28,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, //  Colors.white, //Atento a editar
+      backgroundColor: tdBGColor, //  Colors.white, //Atento a editar
       body: SafeArea(
         child: screens[selectedIndex],
       ),
@@ -37,7 +37,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
         child: GNav(
           color: tdBlack,
           activeColor: tdBlack,
-          tabBackgroundColor: tdBGColor,
+          tabBackgroundColor: Colors.black12,
           tabBorderRadius: 20,
           padding: const EdgeInsets.all(10.5),
           gap: 8.0,
