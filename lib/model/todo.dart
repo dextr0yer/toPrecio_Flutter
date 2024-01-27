@@ -139,6 +139,7 @@ class ToDo {
           todoText: "Margarita Yogur bebible durazno 100g",
           price: 7.0),
       ToDo(id: '68', todoText: "Colanta Queso campasino 500g", price: 8.4),
+      ToDo(id: '69', todoText: "Azucar Montalban 1Kg", price: 4.900),
     ];
   }
 }

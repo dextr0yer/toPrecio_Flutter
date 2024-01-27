@@ -44,7 +44,7 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
           tabs: const [
             GButton(icon: Icons.home_outlined, text: 'Home'),
             GButton(icon: Icons.search_outlined, text: 'Precios'),
-            GButton(icon: Icons.favorite, text: 'Favorito'),
+            GButton(icon: Icons.shopping_bag_outlined, text: 'Inventario'),
             GButton(icon: Icons.settings_outlined, text: 'Config'),
           ],
           onTabChange: (i) {

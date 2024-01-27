@@ -9,18 +9,27 @@ class FavoriteScreen extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-            backgroundColor: tdBGColor, elevation: 0, title: Text('Favorite')),
+            backgroundColor: tdBGColor,
+            elevation: 0,
+            title: Text('Inventario')),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                Icons.home_outlined,
+                Icons.shopping_bag_outlined,
                 size: 100,
               ),
-              Text('Favorite Screen'),
+              Text('Inventario Screen'),
             ],
           ),
+          // ),
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () {
+          //     // Add your onPressed code here!
+          //   },
+          //   backgroundColor: Colors.green,
+          //   child: const Icon(Icons.add),
         ),
       ),
     );

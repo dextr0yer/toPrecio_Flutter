@@ -9,7 +9,7 @@ class SettingScreen extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-            backgroundColor: tdBGColor, elevation: 0, title: Text('Home')),
+            backgroundColor: tdBGColor, elevation: 0, title: Text('Settings')),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

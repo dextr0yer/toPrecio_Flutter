@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/todo.dart';
 import '../themes/colors.dart';
 import '../widgets/todo_item.dart';
+import '../screens/add_edit_product.dart';
 
 // ignore: camel_case_types
 class SearchScreen extends StatefulWidget {
@@ -93,6 +94,16 @@ class _SearchScreenState extends State<SearchScreen> {
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddEditScreens()),
+          );
+        },
+        child: Icon(Icons.add),
+        backgroundColor: tdBGColor,
       ),
     );
   }
