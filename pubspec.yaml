@@ -38,6 +38,8 @@ dependencies:
   google_nav_bar: ^5.0.6
   dropdown_search: ^5.0.6
   http: ^1.2.0
+  shared_preferences: ^2.2.2
+  
 
 dev_dependencies:
   flutter_test:

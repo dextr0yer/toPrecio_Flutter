@@ -1,43 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../model/todo.dart';
 import '../themes/colors.dart';
 import '../widgets/todo_item.dart';
 import '../screens/add_edit_product.dart';
 
-// ignore: camel_case_types
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  const SearchScreen({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _SearchScreenState createState() => _SearchScreenState();
 }
 
-// ignore: camel_case_types
 class _SearchScreenState extends State<SearchScreen> {
-  final todosList = ToDo.todoList();
   List<ToDo> _foundToDo = [];
+  List<ToDo> _allToDo = [];
 
   @override
   void initState() {
-    _foundToDo = todosList;
+    _fetchData();
     super.initState();
   }
 
-  void _runFilter(String enteredKeyword) {
-    List<ToDo> results = [];
-    if (enteredKeyword.isEmpty) {
-      results = todosList;
-    } else {
-      results = todosList
-          .where((item) => item.todoText!
-              .toLowerCase()
-              .contains(enteredKeyword.toLowerCase()))
-          .toList();
+  void _fetchData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey('todos')) {
+      // Si hay datos guardados localmente, los recuperamos
+      String jsonString = prefs.getString('todos')!;
+      List<dynamic> data = json.decode(jsonString);
+      List<ToDo> todos = data.map((item) {
+        return ToDo(
+          id: item['id'].toString(),
+          todoText: item['products'],
+          price: item['value'].toDouble(),
+        );
+      }).toList();
+
+      if (mounted) {
+        // Verifica si el widget está montado antes de actualizar el estado
+        setState(() {
+          _foundToDo = todos;
+          _allToDo = todos;
+        });
+      }
     }
 
+    final response = await http
+        .get(Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      List<ToDo> todos = data.map((item) {
+        return ToDo(
+          id: item['id'].toString(),
+          todoText: item['products'],
+          price: item['value'].toDouble(),
+        );
+      }).toList();
+
+      if (mounted) {
+        // Verifica si el widget está montado antes de actualizar el estado
+        setState(() {
+          _foundToDo = todos;
+          _allToDo = todos;
+        });
+      }
+
+      // Guardamos los datos localmente
+      prefs.setString('todos', json.encode(data));
+    } else {
+      throw Exception('Failed to load data from API');
+    }
+  }
+
+  void _runFilter(String enteredKeyword) {
     setState(() {
-      _foundToDo = results;
+      if (enteredKeyword.isNotEmpty) {
+        _foundToDo = _allToDo
+            .where((item) => item.todoText!
+                .toLowerCase()
+                .contains(enteredKeyword.toLowerCase()))
+            .toList();
+      } else {
+        _foundToDo = List.from(_allToDo);
+      }
     });
   }
 
@@ -45,23 +95,26 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: TextField(
         onChanged: (value) => _runFilter(value),
         decoration: const InputDecoration(
-            contentPadding: EdgeInsets.all(0),
-            prefixIcon: Icon(
-              Icons.search,
-              color: tdBlack,
-              size: 20,
-            ),
-            prefixIconConstraints: BoxConstraints(
-              maxHeight: 20,
-              minWidth: 25,
-            ),
-            border: InputBorder.none,
-            hintText: 'Buscar...',
-            hintStyle: TextStyle(color: tdGrey)),
+          contentPadding: EdgeInsets.all(0),
+          prefixIcon: Icon(
+            Icons.search,
+            color: tdBlack,
+            size: 20,
+          ),
+          prefixIconConstraints: BoxConstraints(
+            maxHeight: 20,
+            minWidth: 25,
+          ),
+          border: InputBorder.none,
+          hintText: 'Buscar...',
+          hintStyle: TextStyle(color: tdGrey),
+        ),
       ),
     );
   }
@@ -83,7 +136,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     margin: const EdgeInsets.only(top: 50, bottom: 20),
                     child: const Text('Lista Precios',
                         style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.w500)),
+                          fontSize: 30,
+                          fontWeight: FontWeight.w500,
+                        )),
                   ),
                   for (ToDo todo in _foundToDo)
                     ToDoItem(
@@ -110,23 +165,26 @@ class _SearchScreenState extends State<SearchScreen> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Icon(
-          Icons.arrow_back,
-          color: tdBlack,
-          size: 30,
-        ),
-        const Text('Nelly Martinez',
-            style: TextStyle(fontSize: 20, color: Colors.black)),
-        SizedBox(
-          height: 40,
-          width: 40,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset('assets/images/avatar.jpg'),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Icon(
+            Icons.arrow_back,
+            color: tdBlack,
+            size: 30,
           ),
-        ),
-      ]),
+          const Text('Nelly Martinez',
+              style: TextStyle(fontSize: 20, color: Colors.black)),
+          SizedBox(
+            height: 40,
+            width: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset('assets/images/avatar.jpg'),
+            ),
+          ),
+        ],
+      ),
       backgroundColor: tdBGColor,
       elevation: 0,
     );
