@@ -36,7 +36,7 @@ class _SearchScreenState extends State<SearchScreen> {
         return ToDo(
           id: item['id'].toString(),
           todoText: item['products'],
-          price: item['value'].toDouble(),
+          price: item['al_detal'].toDouble(),
         );
       }).toList();
 
@@ -49,31 +49,37 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     }
 
-    final response = await http
-        .get(Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
+    try {
+      final response = await http.get(
+          Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      List<ToDo> todos = data.map((item) {
-        return ToDo(
-          id: item['id'].toString(),
-          todoText: item['products'],
-          price: item['value'].toDouble(),
-        );
-      }).toList();
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        List<ToDo> todos = data.map((item) {
+          return ToDo(
+            id: item['id'].toString(),
+            todoText: item['products'],
+            price: item['al_detal'].toDouble(),
+          );
+        }).toList();
 
-      if (mounted) {
-        // Verifica si el widget está montado antes de actualizar el estado
-        setState(() {
-          _foundToDo = todos;
-          _allToDo = todos;
-        });
+        if (mounted) {
+          // Verifica si el widget está montado antes de actualizar el estado
+          setState(() {
+            _foundToDo = todos;
+            _allToDo = todos;
+          });
+        }
+
+        // Guardamos los datos localmente
+        prefs.setString('todos', json.encode(data));
+      } else {
+        throw Exception('Failed to load data from API');
       }
-
-      // Guardamos los datos localmente
-      prefs.setString('todos', json.encode(data));
-    } else {
-      throw Exception('Failed to load data from API');
+    } catch (e) {
+      // Manejar la excepción
+      print('Error fetching data: $e');
+      // Puedes mostrar un mensaje de error al usuario o tomar otra acción apropiada aquí
     }
   }
 
@@ -112,7 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
             minWidth: 25,
           ),
           border: InputBorder.none,
-          hintText: 'Buscar...',
+          hintText: 'Buscar....',
           hintStyle: TextStyle(color: tdGrey),
         ),
       ),
