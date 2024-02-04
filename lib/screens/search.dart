@@ -18,6 +18,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   List<ToDo> _foundToDo = [];
   List<ToDo> _allToDo = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -25,31 +26,32 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
   }
 
-  void _fetchData() async {
+  Future<void> _fetchData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if (prefs.containsKey('todos')) {
-      // Si hay datos guardados localmente, los recuperamos
-      String jsonString = prefs.getString('todos')!;
-      List<dynamic> data = json.decode(jsonString);
-      List<ToDo> todos = data.map((item) {
-        return ToDo(
-          id: item['id'].toString(),
-          todoText: item['products'],
-          price: item['al_detal'].toDouble(),
-        );
-      }).toList();
+    try {
+      if (prefs.containsKey('todos')) {
+        String jsonString = prefs.getString('todos')!;
+        List<dynamic> data = json.decode(jsonString);
+        List<ToDo> todos = data.map((item) {
+          return ToDo(
+            id: item['id'].toString(),
+            todoText: item['products'],
+            price: item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
+          );
+        }).toList();
 
-      if (mounted) {
-        // Verifica si el widget está montado antes de actualizar el estado
         setState(() {
           _foundToDo = todos;
           _allToDo = todos;
+          _isLoading = false;
         });
       }
-    }
 
-    try {
       final response = await http.get(
           Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
 
@@ -59,19 +61,16 @@ class _SearchScreenState extends State<SearchScreen> {
           return ToDo(
             id: item['id'].toString(),
             todoText: item['products'],
-            price: item['al_detal'].toDouble(),
+            price: item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
           );
         }).toList();
 
-        if (mounted) {
-          // Verifica si el widget está montado antes de actualizar el estado
-          setState(() {
-            _foundToDo = todos;
-            _allToDo = todos;
-          });
-        }
+        setState(() {
+          _foundToDo = todos;
+          _allToDo = todos;
+          _isLoading = false;
+        });
 
-        // Guardamos los datos localmente
         prefs.setString('todos', json.encode(data));
       } else {
         throw Exception('Failed to load data from API');
@@ -80,6 +79,9 @@ class _SearchScreenState extends State<SearchScreen> {
       // Manejar la excepción
       print('Error fetching data: $e');
       // Puedes mostrar un mensaje de error al usuario o tomar otra acción apropiada aquí
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -130,32 +132,36 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: tdBGColor,
       appBar: _buildAppBar(),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Column(
-          children: [
-            searchBox(),
-            Expanded(
-              child: ListView(
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Column(
                 children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 50, bottom: 20),
-                    child: const Text('Lista Precios',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w500,
-                        )),
-                  ),
-                  for (ToDo todo in _foundToDo)
-                    ToDoItem(
-                      todo: todo,
+                  searchBox(),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 50, bottom: 20),
+                          child: const Text('Lista Precios',
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ),
+                        for (ToDo todo in _foundToDo)
+                          ToDoItem(
+                            todo: todo,
+                          ),
+                      ],
                     ),
+                  )
                 ],
               ),
-            )
-          ],
-        ),
-      ),
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

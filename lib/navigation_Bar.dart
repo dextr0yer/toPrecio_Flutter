@@ -28,7 +28,9 @@ class _NavigationBarWidgetState extends State<NavigationBarWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: tdBGColor, //  Colors.white, //Atento a editar
+      backgroundColor: tdBGColor,
+
+      //  Colors.white, //Atento a editar
       body: SafeArea(
         child: screens[selectedIndex],
       ),
