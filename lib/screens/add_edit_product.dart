@@ -32,8 +32,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
   List<String> countriesList = [
     'Viveres',
     'Detergentes',
-    'Plasticos',
     'Chucherias',
+    'Plasticos',
     'Farmacias',
   ];
 
@@ -72,16 +72,16 @@ class _AddEditScreensState extends State<AddEditScreens> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       // Limpiar los campos del formulario excepto "nombre" y "categoría"
-      // pesoController.clear();
-      // unidadesPorCajaController.clear();
-      // precioCompraController.clear();
-      // unidadesController.clear();
-      // alDetalController.clear();
-      // alPorMayorController.clear();
-      // codigoDeBarraController.clear();
+      pesoController.clear();
+      unidadesPorCajaController.clear();
+      precioCompraController.clear();
+      unidadesController.clear();
+      alDetalController.clear();
+      alPorMayorController.clear();
+      codigoDeBarraController.clear();
 
       // // Actualizar el estado para reflejar los cambios en los campos del formulario
-      // setState(() {});
+      setState(() {});
     } else if (response.statusCode == 400) {
       // El código de barras ya está en uso
       final snackBar = SnackBar(
@@ -228,13 +228,13 @@ class _AddEditScreensState extends State<AddEditScreens> {
                       controller: unidadesPorCajaController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Uds. por Caja',
+                        labelText: 'Uds. por Caja / Bulto',
                         border: OutlineInputBorder(),
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese la cantidad de unidades por caja';
+                          return 'Por favor, ingrese la cantidad de unidades por caja / bulto';
                         }
                         return null;
                       },
@@ -271,13 +271,13 @@ class _AddEditScreensState extends State<AddEditScreens> {
                       controller: unidadesController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Unidades',
+                        labelText: 'Caja / Bulto',
                         border: OutlineInputBorder(),
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese la cantidad de unidades';
+                          return 'Por favor, ingrese la cantidad de caja / bulto';
                         }
                         return null;
                       },

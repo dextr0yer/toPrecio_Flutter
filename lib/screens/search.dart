@@ -19,14 +19,23 @@ class _SearchScreenState extends State<SearchScreen> {
   List<ToDo> _foundToDo = [];
   List<ToDo> _allToDo = [];
   bool _isLoading = false;
+  bool _isMounted = false; // Add this line
 
   @override
   void initState() {
+    _isMounted = true; // Add this line
     _fetchData();
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _isMounted = false; // Add this line
+    super.dispose();
+  }
+
   Future<void> _fetchData() async {
+    if (!_isMounted) return; // Add this check
     setState(() {
       _isLoading = true;
     });
@@ -41,7 +50,12 @@ class _SearchScreenState extends State<SearchScreen> {
           return ToDo(
             id: item['id'].toString(),
             todoText: item['products'],
-            price: item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
+            price: item['detal_division'] != null
+                ? item['detal_division'].toDouble()
+                : 0.0,
+            alPorMayor: item['al_por_mayor'] != null
+                ? item['al_por_mayor'].toDouble()
+                : 0.0,
           );
         }).toList();
 
@@ -61,7 +75,12 @@ class _SearchScreenState extends State<SearchScreen> {
           return ToDo(
             id: item['id'].toString(),
             todoText: item['products'],
-            price: item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
+            price: item['detal_division'] != null
+                ? item['detal_division'].toDouble()
+                : 0.0,
+            alPorMayor: item['al_por_mayor'] != null
+                ? item['al_por_mayor'].toDouble()
+                : 0.0,
           );
         }).toList();
 
@@ -76,6 +95,8 @@ class _SearchScreenState extends State<SearchScreen> {
         throw Exception('Failed to load data from API');
       }
     } catch (e) {
+      if (!_isMounted) return; // Add this check
+      // Handle the exception
       // Manejar la excepción
       print('Error fetching data: $e');
       // Puedes mostrar un mensaje de error al usuario o tomar otra acción apropiada aquí
