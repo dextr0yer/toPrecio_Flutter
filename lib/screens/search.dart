@@ -56,6 +56,11 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
+            peso: item['peso'] != null ? item['peso'] as int : null,
+            unidadesPorCaja: item['unidades_por_caja'] != null
+                ? item['unidades_por_caja'] as int
+                : null,
+            unidadMedida: item['unidad_medida'].toString(),
           );
         }).toList();
 
@@ -81,6 +86,11 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
+            peso: item['peso'] != null ? item['peso'] as int : null,
+            unidadesPorCaja: item['unidades_por_caja'] != null
+                ? item['unidades_por_caja'] as int
+                : null,
+            unidadMedida: item['unidad_medida'].toString(),
           );
         }).toList();
 

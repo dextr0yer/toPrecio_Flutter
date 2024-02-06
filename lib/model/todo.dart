@@ -4,6 +4,16 @@ class ToDo {
   bool isDone;
   double price;
   double alPorMayor;
+  String? category;
+  int? peso;
+  String? unidadMedida;
+  int? unidadesPorCaja;
+  int? precioCompra;
+  int? unidades;
+  int? alDetal;
+  String? codigoDeBarra;
+  double? detalDivision;
+  DateTime? createdAt;
 
   ToDo({
     required this.id,
@@ -11,6 +21,16 @@ class ToDo {
     this.isDone = false,
     required this.price,
     required this.alPorMayor,
+    this.category,
+    this.peso,
+    this.unidadMedida,
+    this.unidadesPorCaja,
+    this.precioCompra,
+    this.unidades,
+    this.alDetal,
+    this.codigoDeBarra,
+    this.detalDivision,
+    this.createdAt,
   });
 
   // static List<ToDo> todoList() {

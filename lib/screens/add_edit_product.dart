@@ -1,4 +1,4 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +11,17 @@ class AddEditScreens extends StatefulWidget {
 
   @override
   _AddEditScreensState createState() => _AddEditScreensState();
+}
+
+class DollarAmountController extends TextEditingController {
+  DollarAmountController({String? text}) : super(text: text);
+
+  @override
+  set text(String? newText) {
+    // Solo permitir números y el símbolo $
+    var filteredText = newText?.replaceAll(RegExp(r'\D'), '');
+    super.text = filteredText!;
+  }
 }
 
 class _AddEditScreensState extends State<AddEditScreens> {
@@ -254,6 +265,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
                         labelText: 'Precio Compra',
                         border: OutlineInputBorder(),
                         icon: Icon(Icons.local_shipping_outlined),
+                        prefixText:
+                            '\$ ', // Agrega el símbolo $ antes del texto
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
@@ -296,6 +309,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                         labelText: 'Al Detal',
                         border: OutlineInputBorder(),
                         icon: Icon(Icons.monetization_on_outlined),
+                        prefixText: '\$ ',
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
@@ -315,6 +329,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                         labelText: 'Al Por Mayor',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.widgets_outlined),
+                        prefixText: '\$ ',
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
