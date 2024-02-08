@@ -53,6 +53,9 @@ class _SearchScreenState extends State<SearchScreen> {
             price: item['detal_division'] != null
                 ? item['detal_division'].toDouble()
                 : 0.0,
+            divMayor: item['mayor_division'] != null
+                ? item['mayor_division'].toDouble()
+                : 0.0,
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
@@ -82,6 +85,9 @@ class _SearchScreenState extends State<SearchScreen> {
             todoText: item['products'],
             price: item['detal_division'] != null
                 ? item['detal_division'].toDouble()
+                : 0.0,
+            divMayor: item['mayor_division'] != null
+                ? item['mayor_division'].toDouble()
                 : 0.0,
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()

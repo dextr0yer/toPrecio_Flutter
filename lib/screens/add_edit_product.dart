@@ -161,6 +161,12 @@ class _AddEditScreensState extends State<AddEditScreens> {
                   icon: Icon(Icons.inventory_2_outlined),
                 ),
                 textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(
+                      r'^[A-Z ]+$')), // Solo permite letras mayúsculas y espacios
+                ],
+                textCapitalization: TextCapitalization
+                    .characters, // Bloquea la tecla de mayúscula
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Por favor, ingrese el nombre del producto';

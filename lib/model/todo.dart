@@ -3,6 +3,7 @@ class ToDo {
   String? todoText;
   bool isDone;
   double price;
+  double divMayor;
   double alPorMayor;
   String? category;
   int? peso;
@@ -20,6 +21,7 @@ class ToDo {
     required this.todoText,
     this.isDone = false,
     required this.price,
+    required this.divMayor,
     required this.alPorMayor,
     this.category,
     this.peso,
