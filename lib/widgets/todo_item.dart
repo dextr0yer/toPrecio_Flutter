@@ -167,7 +167,7 @@ class ToDoItem extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          '${todo.divMayor.toStringAsFixed(1)}', // Redondea a 1 decimal
+                          '${todo.divMayor.toStringAsFixed(2)}', // Redondea a 2 decimal
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.white,
