@@ -75,7 +75,8 @@ class _SearchScreenState extends State<SearchScreen> {
       }
 
       final response = await http.get(
-          Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
+          //Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
+          Uri.parse('https://api-dev-toprecio.onrender.com/api/v1/inventory/'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);

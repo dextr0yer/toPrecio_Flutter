@@ -32,10 +32,15 @@ class _AddEditScreensState extends State<AddEditScreens> {
   final TextEditingController pesoController = TextEditingController();
   final TextEditingController unidadesPorCajaController =
       TextEditingController();
-  final TextEditingController precioCompraController = TextEditingController();
+  // final TextEditingController precioCompraController = TextEditingController();
   final TextEditingController unidadesController = TextEditingController();
+  final TextEditingController detalDivisionController = TextEditingController();
+  final TextEditingController precioCompraController = TextEditingController();
+  final TextEditingController mayorDivisionController = TextEditingController();
+  final TextEditingController sumaMayorController = TextEditingController();
   final TextEditingController alDetalController = TextEditingController();
   final TextEditingController alPorMayorController = TextEditingController();
+
   final TextEditingController codigoDeBarraController = TextEditingController();
 
   String selectedUnidadMedida = 'kg';
@@ -53,8 +58,12 @@ class _AddEditScreensState extends State<AddEditScreens> {
       return;
     }
 
+    // Llamar a la función para sumar los valores
+    sumarCompra();
+
     //final url = 'http://localhost:8000/api/v1/inventory/';
-    final url = 'https://api-toprecio.onrender.com/api/v1/inventory/';
+    //final url = 'https://api-toprecio.onrender.com/api/v1/inventory/';
+    final url = 'https://api-dev-toprecio.onrender.com/api/v1/inventory/';
     final response = await http.post(Uri.parse(url), body: {
       'products': nombreController.text,
       'category': itemSelected,
@@ -65,6 +74,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
       'unidades': unidadesController.text,
       'al_detal': alDetalController.text,
       'al_por_mayor': alPorMayorController.text,
+      'detal_division': detalDivisionController.text,
+      'mayor_division': mayorDivisionController.text,
       'codigo_de_barra': codigoDeBarraController
           .text, // Enviar el código de barras como una cadena de caracteres
     });
@@ -87,8 +98,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
       unidadesPorCajaController.clear();
       precioCompraController.clear();
       unidadesController.clear();
-      alDetalController.clear();
-      alPorMayorController.clear();
+      detalDivisionController.clear();
+
       codigoDeBarraController.clear();
 
       // // Actualizar el estado para reflejar los cambios en los campos del formulario
@@ -131,6 +142,77 @@ class _AddEditScreensState extends State<AddEditScreens> {
       systemNavigationBarIconBrightness:
           Brightness.dark, // Color de los iconos de la barra de navegación
     ));
+  }
+
+  void updateUdsPorcentajeMayor() {
+    if (unidadesPorCajaController.text.isNotEmpty &&
+        precioCompraController.text.isNotEmpty) {
+      final double? unidadesPorCaja =
+          double.tryParse(unidadesPorCajaController.text);
+      final double? alPorMayor = double.tryParse(precioCompraController.text);
+      if (unidadesPorCaja != null &&
+          alPorMayor != null &&
+          unidadesPorCaja != 0) {
+        double resultadoFinal = alPorMayor;
+        try {
+          String expresion = sumaMayorController.text.replaceAll(' ', '');
+          resultadoFinal += double.parse(expresion);
+        } catch (e) {
+          // Error al analizar la expresión matemática
+          // Puedes manejar el error de alguna manera si lo deseas
+        }
+        resultadoFinal /= unidadesPorCaja; // Dividir por unidadesPorCaja
+        mayorDivisionController.text = resultadoFinal.toStringAsFixed(2);
+      }
+    }
+  }
+
+  void updateExpresionMatematica() {
+    // Obtener los valores de Al Detal y Uds. por Caja
+    double alDetal = double.tryParse(detalDivisionController.text) ?? 0;
+    double unidadesPorCaja =
+        double.tryParse(unidadesPorCajaController.text) ?? 1;
+
+    // Realizar la operación de multiplicación
+    double resultado = alDetal * unidadesPorCaja;
+
+    // Actualizar el valor del controlador expresionMatematicaController
+    alDetalController.text = resultado.toString();
+  }
+
+  void sumarCompra() {
+    double precioCompra = double.tryParse(precioCompraController.text) ?? 0;
+    double sumaMayor = double.tryParse(sumaMayorController.text) ?? 0;
+
+    double resultadoSuma = precioCompra + sumaMayor;
+    alPorMayorController.text = resultadoSuma.toString();
+    // Actualiza el estado para reflejar los cambios en el campo de texto de resultadoSumaController
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    unidadesPorCajaController.addListener(updateUdsPorcentajeMayor);
+    precioCompraController.addListener(updateUdsPorcentajeMayor);
+    sumaMayorController.addListener(updateUdsPorcentajeMayor);
+    //
+    //  Llama a la función sumarValores() cuando se cambia el valor de los controladores relacionados
+    precioCompraController.addListener(sumarCompra);
+    sumaMayorController.addListener(sumarCompra);
+    // Agregar un listener al controlador alDetalController
+    detalDivisionController.addListener(updateExpresionMatematica);
+  }
+
+  @override
+  void dispose() {
+    unidadesPorCajaController.removeListener(updateUdsPorcentajeMayor);
+    precioCompraController.removeListener(updateUdsPorcentajeMayor);
+    sumaMayorController.removeListener(updateUdsPorcentajeMayor);
+    // Eliminar el listener cuando el widget se dispose
+    detalDivisionController.removeListener(updateExpresionMatematica);
+    super.dispose();
   }
 
   @override
@@ -180,6 +262,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                   Icon(Icons.category_outlined),
                   Padding(padding: EdgeInsets.all(9)),
                   Expanded(
+                    flex: 2,
                     child: DropdownSearch<String>(
                       items: countriesList,
                       popupProps: PopupProps.menu(showSearchBox: true),
@@ -197,6 +280,25 @@ class _AddEditScreensState extends State<AddEditScreens> {
                         });
                       },
                       selectedItem: itemSelected,
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    flex: 1,
+                    child: TextFormField(
+                      controller: unidadesController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Pedido',
+                        border: OutlineInputBorder(),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Por favor, ingrese la cantidad de pedido';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -247,11 +349,17 @@ class _AddEditScreensState extends State<AddEditScreens> {
                       decoration: const InputDecoration(
                         labelText: 'Uds. por Caja / Bulto',
                         border: OutlineInputBorder(),
+                        // Establecemos el prefixIcon como null para eliminar el ícono de prefijo
+                        prefixIcon: null,
+                        // Establecemos el prefixText como null para eliminar el prefijo de texto
+                        prefixText: null,
+                        // Agregamos el carácter "x" como prefijo de texto
+                        prefix: Text('x ', style: TextStyle(color: tdBlack)),
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese la cantidad de unidades por caja / bulto';
+                          return 'PoColor.fromARGB(255, 122, 105, 105)rese la cantidad de unidades por caja / bulto';
                         }
                         return null;
                       },
@@ -260,24 +368,52 @@ class _AddEditScreensState extends State<AddEditScreens> {
                 ],
               ),
               const SizedBox(height: 20),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       flex: 6,
+              //       child: TextFormField(
+              //         // controller: precioCompraController,
+              //         controller: alPorMayorController,
+              //         keyboardType: TextInputType.number,
+              //         decoration: InputDecoration(
+              //           labelText: 'Resultado Suma',
+              //           border: OutlineInputBorder(),
+              //           icon: Icon(Icons.local_shipping_outlined),
+              //           prefixText:
+              //               '\$ ', // Agrega el símbolo $ antes del texto
+              //         ),
+              //         // enabled: false, // Para evitar que el usuario edite este campo
+              //         textInputAction: TextInputAction.next,
+              //         validator: (value) {
+              //           if (value!.isEmpty) {
+              //             return 'Por favor, ingrese Resultado Suma';
+              //           }
+              //           return null;
+              //         },
+              //       ),
+              //     ),
+              //     const SizedBox(width: 16.0),
+              //   ],
+              // ),
+              //const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
-                    flex: 6,
                     child: TextFormField(
                       controller: precioCompraController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Precio Compra',
                         border: OutlineInputBorder(),
+                        // icon: Icon(Icons.monetization_on_outlined),
                         icon: Icon(Icons.local_shipping_outlined),
-                        prefixText:
-                            '\$ ', // Agrega el símbolo $ antes del texto
+                        prefixText: '\$ ',
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese el precio de compra';
+                          return 'Por favor, ingrese el precio al por mayor';
                         }
                         return null;
                       },
@@ -285,18 +421,70 @@ class _AddEditScreensState extends State<AddEditScreens> {
                   ),
                   const SizedBox(width: 16.0),
                   Expanded(
-                    flex: 4,
                     child: TextFormField(
-                      controller: unidadesController,
+                      controller: sumaMayorController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Caja / Bulto',
+                      decoration: InputDecoration(
+                        labelText: 'Suma',
                         border: OutlineInputBorder(),
+                        icon: Icon(Icons.add),
+                        prefixIcon: Icon(Icons.call_missed_outgoing_outlined),
+                        prefixText: '\$ ',
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese la cantidad de caja / bulto';
+                          return 'Por favor, ingrese la suma';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: TextFormField(
+                      controller: mayorDivisionController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Uds. % Mayor',
+                        border: OutlineInputBorder(),
+                        //icon: Icon(Icons.add_to_photos_outlined),
+                        icon: Icon(Icons.monetization_on_outlined),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Por favor, Uds. Mayor';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    flex: 6,
+                    child: TextFormField(
+                      // controller: precioCompraController,
+                      controller: alPorMayorController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Caja Mayor',
+                        icon: Icon(Icons.short_text_sharp),
+                        border: OutlineInputBorder(),
+                        // icon: Icon(Icons.local_shipping_outlined),
+                        prefixText:
+                            '\$ ', // Agrega el símbolo $ antes del texto
+                      ),
+                      // enabled: false, // Para evitar que el usuario edite este campo
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Por favor, ingrese Resultado Suma';
                         }
                         return null;
                       },
@@ -309,18 +497,17 @@ class _AddEditScreensState extends State<AddEditScreens> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: alDetalController,
-                      keyboardType: TextInputType.number,
+                      controller: detalDivisionController,
+                      keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         labelText: 'Al Detal',
                         border: OutlineInputBorder(),
-                        icon: Icon(Icons.monetization_on_outlined),
-                        prefixText: '\$ ',
+                        icon: Icon(Icons.calculate_outlined),
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese el precio al detal';
+                          return 'Por favor, ingrese precio al Detal';
                         }
                         return null;
                       },
@@ -329,18 +516,19 @@ class _AddEditScreensState extends State<AddEditScreens> {
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: TextFormField(
-                      controller: alPorMayorController,
+                      controller: alDetalController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Al Por Mayor',
+                        labelText: 'Caja Detal',
                         border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.widgets_outlined),
+                        icon: Icon(Icons.short_text_sharp),
+                        prefixIcon: Icon(Icons.call_missed_outgoing_outlined),
                         prefixText: '\$ ',
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Por favor, ingrese el precio al por mayor';
+                          return 'Por favor, ingrese la suma al detal';
                         }
                         return null;
                       },
@@ -359,7 +547,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                       decoration: InputDecoration(
                         labelText: 'Codigo de Barra',
                         border: OutlineInputBorder(),
-                        icon: Icon(Icons.qr_code),
+                        icon: Icon(Icons.document_scanner_outlined),
                       ),
                       textInputAction: TextInputAction.next,
                       validator: (value) {
