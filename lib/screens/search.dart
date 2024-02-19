@@ -59,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
-            peso: item['peso'] != null ? item['peso'] as int : null,
+            peso: item['peso'] != null ? item['peso'].toDouble() : null,
             unidadesPorCaja: item['unidades_por_caja'] != null
                 ? item['unidades_por_caja'] as int
                 : null,
@@ -76,7 +76,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
       final response = await http.get(
           //Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
-          Uri.parse('https://api-dev-toprecio.onrender.com/api/v1/inventory/'));
+          //Uri.parse('https://api-dev-toprecio.onrender.com/api/v1/inventory/'));
+          Uri.parse('http://192.168.0.100:8000/api/v1/inventory/'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
@@ -93,7 +94,7 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
-            peso: item['peso'] != null ? item['peso'] as int : null,
+            peso: item['peso'] != null ? item['peso'].toDouble() : null,
             unidadesPorCaja: item['unidades_por_caja'] != null
                 ? item['unidades_por_caja'] as int
                 : null,
@@ -109,6 +110,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
         prefs.setString('todos', json.encode(data));
       } else {
+        // Imprime el cuerpo de la respuesta para obtener más detalles sobre el error
+        print('Error fetching data: ${response.statusCode} ${response.body}');
         throw Exception('Failed to load data from API');
       }
     } catch (e) {

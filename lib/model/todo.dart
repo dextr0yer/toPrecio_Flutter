@@ -6,12 +6,12 @@ class ToDo {
   double divMayor;
   double alPorMayor;
   String? category;
-  int? peso;
+  double? peso; // Cambia 'int?' a 'double?'
   String? unidadMedida;
   int? unidadesPorCaja;
-  int? precioCompra;
+  double? precioCompra;
   int? unidades;
-  int? alDetal;
+  double? alDetal;
   String? codigoDeBarra;
   double? detalDivision;
   DateTime? createdAt;
