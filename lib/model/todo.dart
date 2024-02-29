@@ -1,5 +1,5 @@
 class ToDo {
-  String? id;
+  int? id;
   String? todoText;
   bool isDone;
   double price;

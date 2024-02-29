@@ -48,7 +48,7 @@ class _SearchScreenState extends State<SearchScreen> {
         List<dynamic> data = json.decode(jsonString);
         List<ToDo> todos = data.map((item) {
           return ToDo(
-            id: item['id'].toString(),
+            id: item['id'] != null ? int.parse(item['id'].toString()) : null,
             todoText: item['products'],
             price: item['detal_division'] != null
                 ? item['detal_division'].toDouble()
@@ -59,11 +59,19 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
+            alDetal:
+                item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
+            detalDivision: item['detal_division'] != null
+                ? item['detal_division'].toDouble()
+                : 0.0,
             peso: item['peso'] != null ? item['peso'].toDouble() : null,
             unidadesPorCaja: item['unidades_por_caja'] != null
                 ? item['unidades_por_caja'] as int
                 : null,
             unidadMedida: item['unidad_medida'].toString(),
+            precioCompra: item['precio_compra'] != null
+                ? item['precio_compra'].toDouble()
+                : 0.0,
           );
         }).toList();
 
@@ -83,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
         List<dynamic> data = json.decode(response.body);
         List<ToDo> todos = data.map((item) {
           return ToDo(
-            id: item['id'].toString(),
+            id: item['id'] != null ? int.parse(item['id'].toString()) : null,
             todoText: item['products'],
             price: item['detal_division'] != null
                 ? item['detal_division'].toDouble()
@@ -94,11 +102,19 @@ class _SearchScreenState extends State<SearchScreen> {
             alPorMayor: item['al_por_mayor'] != null
                 ? item['al_por_mayor'].toDouble()
                 : 0.0,
+            alDetal:
+                item['al_detal'] != null ? item['al_detal'].toDouble() : 0.0,
+            detalDivision: item['detal_division'] != null
+                ? item['detal_division'].toDouble()
+                : 0.0,
             peso: item['peso'] != null ? item['peso'].toDouble() : null,
             unidadesPorCaja: item['unidades_por_caja'] != null
                 ? item['unidades_por_caja'] as int
                 : null,
             unidadMedida: item['unidad_medida'].toString(),
+            precioCompra: item['precio_compra'] != null
+                ? item['precio_compra'].toDouble()
+                : 0.0,
           );
         }).toList();
 
@@ -183,6 +199,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   searchBox(),
                   Expanded(
+                      child: RefreshIndicator(
+                    onRefresh:
+                        _fetchData, // Función que se llamará al pulsar el RefreshIndicator
                     child: ListView(
                       children: [
                         Container(
@@ -199,7 +218,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                       ],
                     ),
-                  )
+                  ))
                 ],
               ),
             ),
@@ -222,7 +241,7 @@ class _SearchScreenState extends State<SearchScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Icon(
-            Icons.arrow_back,
+            Icons.menu_outlined,
             color: tdBlack,
             size: 30,
           ),

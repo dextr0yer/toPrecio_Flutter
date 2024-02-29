@@ -63,7 +63,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
 
     //final url = 'http://localhost:8000/api/v1/inventory/';
     //final url = 'https://api-toprecio.onrender.com/api/v1/inventory/';
-    final url = 'https://api-dev-toprecio.onrender.com/api/v1/inventory/';
+    //final url = 'https://api-dev-toprecio.onrender.com/api/v1/inventory/';
+    final url = 'http://192.168.0.100:8000/api/v1/inventory/';
     final response = await http.post(Uri.parse(url), body: {
       'products': nombreController.text,
       'category': itemSelected,
@@ -498,7 +499,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                   Expanded(
                     child: TextFormField(
                       controller: detalDivisionController,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Al Detal',
                         border: OutlineInputBorder(),
