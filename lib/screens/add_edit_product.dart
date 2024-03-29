@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:todoapp/themes/colors.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import '../services/api_urls.dart';
 
 class AddEditScreens extends StatefulWidget {
   AddEditScreens({Key? key}) : super(key: key);
@@ -63,8 +64,8 @@ class _AddEditScreensState extends State<AddEditScreens> {
 
     //final url = 'http://localhost:8000/api/v1/inventory/';
     //final url = 'https://api-toprecio.onrender.com/api/v1/inventory/';
-    //final url = 'https://api-dev-toprecio.onrender.com/api/v1/inventory/';
-    final url = 'http://192.168.0.100:8000/api/v1/inventory/';
+    final url = '${ApiUrls.baseUrl}/inventory/';
+    //final url = 'http://192.168.0.100:8000/api/v1/inventory/';
     final response = await http.post(Uri.parse(url), body: {
       'products': nombreController.text,
       'category': itemSelected,
@@ -91,7 +92,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
             Text('Producto agregado'),
           ],
         ),
-        duration: Duration(seconds: 4),
+        duration: Duration(seconds: 6),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       // Limpiar los campos del formulario excepto "nombre" y "categoría"
@@ -108,10 +109,16 @@ class _AddEditScreensState extends State<AddEditScreens> {
     } else if (response.statusCode == 400) {
       // El código de barras ya está en uso
       final snackBar = SnackBar(
-        content: Text('El código de barras ya está en uso'),
+        content: Text(
+          'El código de barras ya está en uso',
+          style: TextStyle(
+            color: tdBlack, // Cambia el color del texto a blanco
+          ),
+        ),
+
         backgroundColor:
             Colors.amber.withOpacity(0.8), // Color amarillo transparente
-        duration: Duration(seconds: 4),
+        duration: Duration(seconds: 6),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
@@ -121,7 +128,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
             style: TextStyle(color: Colors.white)),
         backgroundColor:
             Colors.red[700]?.withOpacity(0.8), // Color rojo transparente
-        duration: Duration(seconds: 4),
+        duration: Duration(seconds: 10),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
@@ -246,7 +253,7 @@ class _AddEditScreensState extends State<AddEditScreens> {
                 textInputAction: TextInputAction.next,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(
-                      r'^[A-Z ]+$')), // Solo permite letras mayúsculas y espacios
+                      r'^[A-Z 0-9+Ñ]+$')), // Solo permite letras mayúsculas y espacios
                 ],
                 textCapitalization: TextCapitalization
                     .characters, // Bloquea la tecla de mayúscula

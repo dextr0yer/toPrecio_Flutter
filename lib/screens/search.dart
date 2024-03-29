@@ -8,6 +8,9 @@ import '../themes/colors.dart';
 import '../widgets/todo_item.dart';
 import '../screens/add_edit_product.dart';
 
+import '../services/api_urls.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
 
@@ -72,6 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
             precioCompra: item['precio_compra'] != null
                 ? item['precio_compra'].toDouble()
                 : 0.0,
+            codigoDeBarra: item['codigo_de_barra'].toString(),
           );
         }).toList();
 
@@ -85,10 +89,11 @@ class _SearchScreenState extends State<SearchScreen> {
       final response = await http.get(
           //Uri.parse('https://api-toprecio.onrender.com/api/v1/inventory/'));
           //Uri.parse('https://api-dev-toprecio.onrender.com/api/v1/inventory/'));
-          Uri.parse('http://192.168.0.100:8000/api/v1/inventory/'));
+          Uri.parse('${ApiUrls.baseUrl}/inventory/'));
 
       if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
+        // Asegúrate de decodificar los datos como UTF-8
+        List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
         List<ToDo> todos = data.map((item) {
           return ToDo(
             id: item['id'] != null ? int.parse(item['id'].toString()) : null,
@@ -115,6 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
             precioCompra: item['precio_compra'] != null
                 ? item['precio_compra'].toDouble()
                 : 0.0,
+            codigoDeBarra: item['codigo_de_barra'].toString(),
           );
         }).toList();
 
@@ -142,17 +148,28 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  void _runFilter(String enteredKeyword) {
+  void _runFilter(String value) {
     setState(() {
-      if (enteredKeyword.isNotEmpty) {
-        _foundToDo = _allToDo
-            .where((item) => item.todoText!
-                .toLowerCase()
-                .contains(enteredKeyword.toLowerCase()))
-            .toList();
-      } else {
-        _foundToDo = List.from(_allToDo);
-      }
+      _foundToDo = _allToDo
+          .where((item) =>
+              item.codigoDeBarra!.toLowerCase().contains(value.toLowerCase()) ||
+              item.todoText!.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
+
+  Future<void> _scanBarcode() async {
+    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', 'Cancelar', true, ScanMode.DEFAULT);
+
+    if (!mounted) return;
+
+    // Aquí puedes buscar el producto por el código de barras escaneado
+    // Por ejemplo, filtrando la lista de productos
+    setState(() {
+      _foundToDo = _allToDo
+          .where((item) => item.codigoDeBarra == barcodeScanRes)
+          .toList();
     });
   }
 
@@ -163,23 +180,28 @@ class _SearchScreenState extends State<SearchScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: TextField(
-        onChanged: (value) => _runFilter(value),
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.all(0),
-          prefixIcon: Icon(
-            Icons.search,
-            color: tdBlack,
-            size: 20,
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              onChanged: (value) => _runFilter(value),
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: tdBlack,
+                  size: 20,
+                ),
+                border: InputBorder.none,
+                hintText: 'Buscar....',
+                hintStyle: TextStyle(color: tdGrey),
+              ),
+            ),
           ),
-          prefixIconConstraints: BoxConstraints(
-            maxHeight: 20,
-            minWidth: 25,
+          IconButton(
+            icon: Icon(Icons.qr_code_scanner),
+            onPressed: _scanBarcode,
           ),
-          border: InputBorder.none,
-          hintText: 'Buscar....',
-          hintStyle: TextStyle(color: tdGrey),
-        ),
+        ],
       ),
     );
   }

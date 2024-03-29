@@ -46,6 +46,7 @@ class ToDoItem extends StatelessWidget {
                       text:
                           '${todo.todoText!} ${todo.peso != null ? todo.peso.toString() : ''} ${todo.unidadMedida ?? ''}',
                       style: TextStyle(
+                        //fontWeight: FontWeight.w500,
                         fontSize: 16,
                         color: tdBlack,
                         decoration:
@@ -56,7 +57,8 @@ class ToDoItem extends StatelessWidget {
                       text: ' - ( x${todo.unidadesPorCaja ?? ''} )',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black54,
+                        //color: Colors.black54,
+                        color: Colors.purple,
                         decoration:
                             todo.isDone ? TextDecoration.lineThrough : null,
                       ),

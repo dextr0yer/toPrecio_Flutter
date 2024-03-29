@@ -4,8 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:todoapp/navigation_Bar.dart';
 import 'package:todoapp/themes/colors.dart';
 // import 'package:todoapp/themes/colors.dart';
+import 'package:get/get.dart';
 
-void main() => runApp(const MyApp());
+import 'dependency_injection.dart';
+
+Future<void> main() async {
+  runApp(const MyApp());
+  DependencyInjection.init();
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,7 +24,7 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ));
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

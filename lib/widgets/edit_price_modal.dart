@@ -4,6 +4,8 @@ import 'package:todoapp/themes/colors.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../services/api_urls.dart';
+
 class EditPriceModal extends StatefulWidget {
   final ToDo todo;
 
@@ -19,13 +21,17 @@ class _EditPriceModalState extends State<EditPriceModal> {
   late TextEditingController alPorMayorController;
   late TextEditingController
       unidadesPorCajaController; // Añadido para el ejemplo
-  final TextEditingController sumaMayorController = TextEditingController();
+  late TextEditingController sumaMayorController = TextEditingController();
   late TextEditingController detalDivisionController = TextEditingController();
   late TextEditingController alDetalController = TextEditingController();
+  late TextEditingController nameController = TextEditingController(
+      text: widget.todo.todoText); // Nuevo controlador para el nombre
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
+    nameController = TextEditingController(text: widget.todo.todoText);
     precioCompraController =
         TextEditingController(text: widget.todo.precioCompra.toString());
     mayorDivisionController =
@@ -38,6 +44,7 @@ class _EditPriceModalState extends State<EditPriceModal> {
         TextEditingController(text: widget.todo.detalDivision.toString());
     alDetalController =
         TextEditingController(text: widget.todo.alDetal.toString());
+    nameController = TextEditingController(text: widget.todo.todoText);
 
     // Añadir listeners para realizar operaciones aritméticas en tiempo real
     precioCompraController.addListener(updateUdsPorcentajeMayor);
@@ -46,16 +53,19 @@ class _EditPriceModalState extends State<EditPriceModal> {
     unidadesPorCajaController.addListener(updateUdsPorcentajeMayor);
     sumaMayorController.addListener(sumarCompra);
     detalDivisionController.addListener(updateExpresionMatematica);
+    sumaMayorController.addListener(sumarCompra);
   }
 
   @override
   void dispose() {
+    nameController.dispose();
     precioCompraController.dispose();
     mayorDivisionController.dispose();
     alPorMayorController.dispose();
     unidadesPorCajaController.dispose();
     detalDivisionController.dispose();
     alDetalController.dispose();
+    sumaMayorController.dispose();
     super.dispose();
   }
 
@@ -76,6 +86,7 @@ class _EditPriceModalState extends State<EditPriceModal> {
           // Error al analizar la expresión matemática
           // Puedes manejar el error de alguna manera si lo deseas
         }
+
         resultadoFinal /= unidadesPorCaja; // Dividir por unidadesPorCaja
         mayorDivisionController.text = resultadoFinal.toStringAsFixed(2);
       }
@@ -107,16 +118,20 @@ class _EditPriceModalState extends State<EditPriceModal> {
 
   Future<void> updatePrice(
       ToDo todo,
+      int newUnidadesPorCaja,
       double newPrecioCompra,
       double newDivMayor,
       double newAlPorMayor,
-      newAlDetal,
-      newDetalDivision) async {
+      double newAlDetal,
+      double newDetalDivision,
+      String newName) async {
     // Asegúrate de que la URL coincida con la ruta que has definido en tu servidor
-    final url = 'http://192.168.0.100:8000/api/v1/update-prices/${todo.id}/';
-    //final url = 'https://api-dev-toprecio.onrender.com/api/v1/update-prices/${todo.id}/';
+    //final url = 'http://192.168.0.100:8000/api/v1/update-prices/${todo.id}/';
+    final url = '${ApiUrls.baseUrl}/update-prices/${todo.id}/';
 
     final Map<String, dynamic> data = {
+      'products': newName,
+      'unidades_por_caja': newUnidadesPorCaja,
       'precio_compra': newPrecioCompra,
       'al_por_mayor': newAlPorMayor, // Cambiado de 'al_detal' a 'al_por_mayor'
       'mayor_division': newDivMayor,
@@ -142,6 +157,8 @@ class _EditPriceModalState extends State<EditPriceModal> {
 
     if (response.statusCode == 200) {
       setState(() {
+        todo.todoText = newName; // Actualiza el nombre en el objeto ToDo
+        todo.unidadesPorCaja = newUnidadesPorCaja;
         todo.price = newPrecioCompra;
         todo.divMayor = newDivMayor;
         todo.alPorMayor = newAlPorMayor;
@@ -151,7 +168,7 @@ class _EditPriceModalState extends State<EditPriceModal> {
       // Muestra un SnackBar con el mensaje de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Precio actualizado'),
+          content: Text('Precio Y Nombre actualizado'),
           backgroundColor: Colors.green,
         ),
       );
@@ -159,7 +176,7 @@ class _EditPriceModalState extends State<EditPriceModal> {
       // Muestra un SnackBar con el mensaje de error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al actualizar precio'),
+          content: Text('Error al actualizar precio y nombre'),
           backgroundColor: Colors.red,
         ),
       );
@@ -170,9 +187,8 @@ class _EditPriceModalState extends State<EditPriceModal> {
   }
 
   Future<void> deleteProduct(int productId) async {
-    //final String url ='https://api-dev-toprecio.onrender.com/api/v1/update-prices/$productId/';
-    final String url =
-        'http://192.168.0.100:8000/api/v1/product-delete/$productId/';
+    final String url = '${ApiUrls.baseUrl}/product-delete/$productId/';
+    // final String url = 'http://192.168.0.100:8000/api/v1/product-delete/$productId/';
     final response = await http.delete(Uri.parse(url));
 
     if (response.statusCode == 204) {
@@ -241,35 +257,93 @@ class _EditPriceModalState extends State<EditPriceModal> {
               ),
             ],
           ),
-          ListTile(
-            title: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        '${widget.todo.todoText!} ${widget.todo.peso != null ? widget.todo.peso.toString() : ''} ${widget.todo.unidadMedida ?? ''}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: tdBlack,
-                      decoration: widget.todo.isDone
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
+
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        // Cambiar a un campo de texto editable al presionar el título
+                        _isEditing = true;
+                      });
+                    },
+                    child: _isEditing
+                        ? TextFormField(
+                            controller: nameController,
+                            autofocus: true,
+                            onFieldSubmitted: (newValue) {
+                              setState(() {
+                                // Actualizar el valor del título al enviar el formulario
+
+                                _isEditing = false;
+                              });
+                            },
+                          )
+                        : RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${widget.todo.todoText!} ${widget.todo.peso != null ? widget.todo.peso.toString() : ''} ${widget.todo.unidadMedida ?? ''}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: tdBlack,
+                                    decoration: widget.todo.isDone
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                ),
+                                // TextSpan(
+                                //   text: ' - ( x${widget.todo.unidadesPorCaja ?? ''} )',
+                                //   style: TextStyle(
+                                //     fontSize: 14,
+                                //     color: Colors.black54,
+                                //     decoration: widget.todo.isDone
+                                //         ? TextDecoration.lineThrough
+                                //         : null,
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                          ),
                   ),
-                  TextSpan(
-                    text: ' - ( x${widget.todo.unidadesPorCaja ?? ''} )',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                      decoration: widget.todo.isDone
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              // const SizedBox(width: 16.0),
+              SizedBox(
+                width: 100, // ajusta el ancho según tus necesidades
+                child: TextFormField(
+                  controller: unidadesPorCajaController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Uds. por Caja / Bulto',
+                    border: OutlineInputBorder(),
+                    // Establecemos el prefixIcon como null para eliminar el ícono de prefijo
+                    prefixIcon: null,
+                    // Establecemos el prefixText como null para eliminar el prefijo de texto
+                    prefixText: null,
+                    // Agregamos el carácter "x" como prefijo de texto
+                    prefix: Text('x ', style: TextStyle(color: tdBlack)),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    updateExpresionMatematica();
+                    updateUdsPorcentajeMayor();
+                    sumarCompra();
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Por favor, ingrese la cantidad de unidades por caja / bulto';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -284,6 +358,9 @@ class _EditPriceModalState extends State<EditPriceModal> {
                     prefixText: '\$ ',
                   ),
                   textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    updateUdsPorcentajeMayor();
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Por favor, ingrese el precio al por mayor';
@@ -306,6 +383,9 @@ class _EditPriceModalState extends State<EditPriceModal> {
                     prefixText: '\$ ',
                   ),
                   textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    sumarCompra();
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Por favor, ingrese la suma';
@@ -356,6 +436,9 @@ class _EditPriceModalState extends State<EditPriceModal> {
                   ),
                   // enabled: false, // Para evitar que el usuario edite este campo
                   textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    sumarCompra();
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Por favor, ingrese Resultado Suma';
@@ -379,6 +462,9 @@ class _EditPriceModalState extends State<EditPriceModal> {
                     icon: Icon(Icons.calculate_outlined),
                   ),
                   textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    updateExpresionMatematica();
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Por favor, ingrese precio al Detal';
@@ -400,6 +486,9 @@ class _EditPriceModalState extends State<EditPriceModal> {
                     prefixText: '\$ ',
                   ),
                   textInputAction: TextInputAction.next,
+                  onChanged: (value) {
+                    updateExpresionMatematica();
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'Por favor, ingrese la suma al detal';
@@ -431,6 +520,8 @@ class _EditPriceModalState extends State<EditPriceModal> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () async {
+              int newUnidadesPorCaja =
+                  int.tryParse(unidadesPorCajaController.text) ?? 0;
               double newPrice =
                   double.tryParse(precioCompraController.text) ?? 0;
               double newDivMayor =
@@ -440,10 +531,18 @@ class _EditPriceModalState extends State<EditPriceModal> {
               double newAlDetal = double.tryParse(alDetalController.text) ?? 0;
               double newDetalDivision =
                   double.tryParse(detalDivisionController.text) ?? 0;
-
+              String newName = nameController
+                  .text; // Asegúrate de obtener el nuevo nombre correctamente
               try {
-                await updatePrice(widget.todo, newPrice, newDivMayor,
-                    newAlPorMayor, newAlDetal, newDetalDivision);
+                await updatePrice(
+                    widget.todo,
+                    newUnidadesPorCaja,
+                    newPrice,
+                    newDivMayor,
+                    newAlPorMayor,
+                    newAlDetal,
+                    newDetalDivision,
+                    newName);
                 Navigator.of(context).pop(); // Cierra el modal
               } catch (e) {
                 // Maneja el error, por ejemplo, mostrando un mensaje de error al usuario
